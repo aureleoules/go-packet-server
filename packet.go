@@ -1,9 +1,9 @@
 package server
 
 import (
-	"fmt"
-	"encoding/binary"
 	"bytes"
+	"encoding/binary"
+	"fmt"
 	"math"
 )
 
@@ -60,7 +60,7 @@ func (p *Packet) extractString() (uint16, string) {
 
 	for i, v := range p.data[3:] {
 		if v == 0 {
-			return uint16(i+1), string(p.data[3:i+3])
+			return uint16(i + 1), string(p.data[3 : i+3])
 		}
 	}
 	return 0, ""
@@ -80,6 +80,12 @@ func (p *Packet) Stringify() string {
 
 func (p *Packet) String() string {
 	return fmt.Sprintf("%d ", p.data)
+}
+
+func (p *Packet) SetBytes(data []byte) {
+	p.data = []byte{0x00, 0x00, p.data[2]}
+	p.data = append(p.data, data...)
+	p.setSize(uint16(len(data) + 3))
 }
 
 func (p *Packet) Write(data ...interface{}) {
@@ -130,7 +136,7 @@ func (p *Packet) Write(data ...interface{}) {
 			b := []byte(v)
 			p.data = append(p.data, b...)
 			p.data = append(p.data, 0)
-			p.addSize(uint16(len(v)+1))
+			p.addSize(uint16(len(v) + 1))
 		case float32:
 			var b bytes.Buffer
 			err := binary.Write(&b, binary.LittleEndian, float32(v))
@@ -157,48 +163,48 @@ func (p *Packet) Read(variables ...interface{}) {
 
 		switch v := variable.(type) {
 		case *byte:
-			if p.Size() >= 3 + 1 {
+			if p.Size() >= 3+1 {
 				*v = p.data[3]
 				p.removeSize(1)
 			}
 		case *int8:
-			if p.Size() >= 3 + 1 {
+			if p.Size() >= 3+1 {
 				*v = int8(p.data[3])
 				p.removeSize(1)
 			}
 		case *uint16:
-			if p.Size() >= 3 + 2 {
-				*v = binary.LittleEndian.Uint16(p.data[3:3 + 2])
+			if p.Size() >= 3+2 {
+				*v = binary.LittleEndian.Uint16(p.data[3 : 3+2])
 				p.removeSize(2)
 			}
 		case *int16:
-			if p.Size() >= 3 + 2 {
-				*v = int16(binary.LittleEndian.Uint16(p.data[3:3 + 2]))
+			if p.Size() >= 3+2 {
+				*v = int16(binary.LittleEndian.Uint16(p.data[3 : 3+2]))
 				p.removeSize(2)
 			}
 		case *int:
-			if p.Size() >= 3 + 4 {
-				*v = int(binary.LittleEndian.Uint32(p.data[3:3 + 4]))
+			if p.Size() >= 3+4 {
+				*v = int(binary.LittleEndian.Uint32(p.data[3 : 3+4]))
 				p.removeSize(4)
 			}
 		case *uint32:
-			if p.Size() >= 3 + 4 {
-				*v = binary.LittleEndian.Uint32(p.data[3:3 + 4])
+			if p.Size() >= 3+4 {
+				*v = binary.LittleEndian.Uint32(p.data[3 : 3+4])
 				p.removeSize(4)
 			}
 		case *int32:
-			if p.Size() >= 3 + 4 {
-				*v = int32(binary.LittleEndian.Uint32(p.data[3:3 + 4]))
+			if p.Size() >= 3+4 {
+				*v = int32(binary.LittleEndian.Uint32(p.data[3 : 3+4]))
 				p.removeSize(4)
 			}
 		case *uint64:
-			if p.Size() >= 3 + 8 {
-				*v = binary.LittleEndian.Uint64(p.data[3:3 + 8])
+			if p.Size() >= 3+8 {
+				*v = binary.LittleEndian.Uint64(p.data[3 : 3+8])
 				p.removeSize(8)
 			}
 		case *int64:
-			if p.Size() >= 3 + 8 {
-				*v = int64(binary.LittleEndian.Uint64(p.data[3:3 + 8]))
+			if p.Size() >= 3+8 {
+				*v = int64(binary.LittleEndian.Uint64(p.data[3 : 3+8]))
 				p.removeSize(8)
 			}
 		case *string:
@@ -207,13 +213,13 @@ func (p *Packet) Read(variables ...interface{}) {
 				p.removeSize(n)
 			}
 		case *float32:
-			if p.Size() >= 3 + 4 {
-				*v = math.Float32frombits(binary.LittleEndian.Uint32(p.data[3:3 + 4]))
+			if p.Size() >= 3+4 {
+				*v = math.Float32frombits(binary.LittleEndian.Uint32(p.data[3 : 3+4]))
 				p.removeSize(4)
 			}
 		case *float64:
-			if p.Size() >= 3 + 8 {
-				*v = math.Float64frombits(binary.LittleEndian.Uint64(p.data[3:3 + 8]))
+			if p.Size() >= 3+8 {
+				*v = math.Float64frombits(binary.LittleEndian.Uint64(p.data[3 : 3+8]))
 				p.removeSize(8)
 			}
 		}
